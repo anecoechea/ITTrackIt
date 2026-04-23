@@ -1,0 +1,6 @@
+@TrackItApi_HostAddress = http://localhost:5219
+
+GET {{TrackItApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
