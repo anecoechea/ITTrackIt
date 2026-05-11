@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TrackItApi.Data;
+using TrackItApi.DTOs;
 using TrackItApi.Models;
 
 namespace TrackItApi.Controllers
@@ -21,39 +22,80 @@ namespace TrackItApi.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
         {
-            return await _context.Users.ToListAsync();
+            var users = await _context.Users.ToListAsync();
+
+            return users.Select(u => new UserDto
+            {
+                Id = u.Id,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                Email = u.Email,
+                Role = u.Role,
+                Department = u.Department,
+                Team = u.Team,
+                IsActive = u.IsActive
+            }).ToList();
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(int id)
+        public async Task<ActionResult<UserDto>> GetUser(int id)
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null) return NotFound();
-            return user;
+            return new UserDto
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                Role = user.Role,
+                Department = user.Department,
+                Team = user.Team,
+                IsActive = user.IsActive
+            };
         }
 
         [HttpPost]
-        public async Task<ActionResult<User>> CreateUser(User user)
+        public async Task<ActionResult<UserDto>> CreateUser(CreateUserDto createdUser)
         {
+            var user = new User
+            {
+                FirstName = createdUser.FirstName,
+                LastName = createdUser.LastName,
+                Email = createdUser.Email,
+                Role = createdUser.Role,
+                Department = createdUser.Department,
+                Team = createdUser.Team,
+            };
+
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
+            return CreatedAtAction(nameof(GetUser), new {id = user.Id}, new UserDto
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                Role = user.Role,
+                Department = user.Department,
+                Team = user.Team,
+                IsActive = user.IsActive
+            });
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<User>> UpdateUser(User user, int id)
+        public async Task<ActionResult> UpdateUser(int id, CreateUserDto updatedUser)
         {
-            var oldUser = await _context.Users.FindAsync(id);
-            if (oldUser == null) return NotFound();
-            oldUser.FirstName = user.FirstName;
-            oldUser.LastName = user.LastName;
-            oldUser.Department = user.Department;
-            oldUser.Email = user.Email;
-            oldUser.IsActive = user.IsActive;
-            oldUser.Role = user.Role;
-            oldUser.Team = user.Team;            
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound();
+            user.FirstName = updatedUser.FirstName;
+            user.LastName = updatedUser.LastName;
+            user.Department = updatedUser.Department;
+            user.Email = updatedUser.Email;
+            user.Role = updatedUser.Role;
+            user.Team = updatedUser.Team;
             await _context.SaveChangesAsync();
             return NoContent();
         }
