@@ -34,7 +34,9 @@ namespace TrackItApi.Controllers
             .Include(t => t.Asset)
             .ToListAsync();
 
-            return tickets.Select(t => new TicketDto
+            return tickets.Select(MapTicket).ToList();
+
+            /* return tickets.Select(t => new TicketDto
             {
                 Id = t.Id,
                 Title = t.Title,
@@ -52,7 +54,7 @@ namespace TrackItApi.Controllers
                     UserId = a.UserId,
                     FullName = $"{a.User.FirstName} {a.User.LastName}"
                 }).ToList()
-            }).ToList();
+            }).ToList(); */
         }
 
         [HttpGet("{id}")]
@@ -67,7 +69,9 @@ namespace TrackItApi.Controllers
 
             if (ticket == null) return NotFound();
 
-            return new TicketDto
+            return MapTicket(ticket);
+
+            /* return new TicketDto
             {
                 Id = ticket.Id,
                 Title = ticket.Title,
@@ -85,10 +89,10 @@ namespace TrackItApi.Controllers
                     UserId = a.UserId,
                     FullName = $"{a.User.FirstName} {a.User.LastName}"
                 }).ToList()
-            };
+            }; */
         }
-        
-            [HttpPost]
+
+        [HttpPost]
         public async Task<ActionResult<TicketDto>> CreateTicket(CreateTicketDto createDto)
         {
             var ticket = new Ticket
@@ -110,7 +114,13 @@ namespace TrackItApi.Controllers
                     .ThenInclude(a => a.User)
                 .FirstOrDefaultAsync(t => t.Id == ticket.Id);
 
-            return CreatedAtAction(nameof(GetTicket), new { id = ticket.Id }, new TicketDto
+            return CreatedAtAction(
+                nameof(GetTicket),
+                new { id = ticket.Id },
+                MapTicket(createdTicket)
+            );
+
+            /* return CreatedAtAction(nameof(GetTicket), new { id = ticket.Id }, new TicketDto
             {
                 Id = createdTicket!.Id,
                 Title = createdTicket.Title,
@@ -128,7 +138,78 @@ namespace TrackItApi.Controllers
                     UserId = a.UserId,
                     FullName = $"{a.User.FirstName} {a.User.LastName}"
                 }).ToList()
-            });
+            }); */
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateTicket(int id, UpdateTicketDto updateDto)
+        {
+            var ticket = await _context.Tickets
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (ticket == null) return NotFound();
+
+            ticket.Title = updateDto.Title;
+            ticket.Description = updateDto.Description;
+            ticket.Status = updateDto.Status;
+            ticket.AssetId = updateDto.AssetId;
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        [HttpPost("{id}/assign")]
+        public async Task<IActionResult> AssignUsers(int id, AssignUsersDto assignUsersDto)
+        {
+            var ticket = await _context.Tickets
+                .Include(t => t.Assignees)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (ticket == null) return NotFound();
+
+            // clear list of assignees to create new list
+            ticket.Assignees.Clear();
+
+            foreach (var userId in assignUsersDto.UserIds)
+            {
+                ticket.Assignees.Add(new TicketAssignment
+                {
+                    TicketId = id,
+                    UserId = userId
+                });
+            }
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+
+        }
+
+        
+
+        
+        private TicketDto MapTicket(Ticket t)
+        {
+            return new TicketDto
+            {
+                Id = t.Id,
+                Title = t.Title,
+                Description = t.Description,
+                Status = t.Status,
+                CreatedAt = t.CreatedAt,
+                AssetId = t.AssetId,
+                AssetName = t.Asset?.Name,
+                CreatedByUserId = t.CreatedByUserId,
+                CreatedByUserName = t.CreatedByUser != null
+                    ? $"{t.CreatedByUser.FirstName} {t.CreatedByUser.LastName}"
+                    : null,
+                Assignees = t.Assignees.Select(a => new AssigneeDto
+                {
+                    UserId = a.UserId,
+                    FullName = $"{a.User.FirstName} {a.User.LastName}"
+                }).ToList()
+            };
         }
     }   
 }

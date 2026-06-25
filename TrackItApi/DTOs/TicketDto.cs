@@ -19,9 +19,5 @@ namespace TrackItApi.DTOs
         public List<AssigneeDto> Assignees { get; set; } = new List<AssigneeDto>();
     }
 
-    public class AssigneeDto
-    {
-        public int UserId { get; set; }
-        public string FullName { get; set; } = string.Empty;
-    }
+    
 }

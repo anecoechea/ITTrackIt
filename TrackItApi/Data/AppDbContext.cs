@@ -30,6 +30,17 @@ namespace TrackItApi.Data
 
             modelBuilder.Entity<TicketAssignment>()
                 .HasKey(ta => new { ta.TicketId, ta.UserId });
+
+            modelBuilder.Entity<TicketAssignment>()
+                .HasOne(ta => ta.Ticket)
+                .WithMany(t => t.Assignees)
+                .HasForeignKey(ta => ta.TicketId);
+
+            modelBuilder.Entity<TicketAssignment>()
+                .HasOne(ta => ta.User)
+                .WithMany(u => u.AssignedTickets)
+                .HasForeignKey(ta => ta.UserId);
+                
         }
     }
 }
