@@ -1,0 +1,51 @@
+.ticket-card {
+  margin-top: 24px;
+  padding: 24px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.ticket-card h2 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 1.5rem;
+}
+
+.ticket-card-status {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.ticket-card-status.open {
+  background-color: #a7f3d0;
+  color: #065f46;
+}
+
+.ticket-card-status.in-progress {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.ticket-card-status.closed {
+  background-color: #d1d5db;
+  color: #374151;
+}
+
+.ticket-card-description {
+  margin: 20px 0;
+  line-height: 1.5;
+}
+
+.ticket-card-meta {
+  margin: 6px 0;
+  color: #555;
+}
+
+.ticket-card-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 24px;
+}

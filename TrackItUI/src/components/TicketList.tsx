@@ -3,9 +3,11 @@ import "../styles/TicketList.css";
 
 interface TicketListProps {
   tickets: Ticket[];
+  setSelectedTicket: (ticket: Ticket) => void;
+  
 }
 
-function TicketList({ tickets }: TicketListProps) {
+function TicketList({ tickets, setSelectedTicket }: TicketListProps) {
   return (
     <table className="ticket-table">
       <thead>
@@ -22,7 +24,9 @@ function TicketList({ tickets }: TicketListProps) {
       
       <tbody>
         {tickets.map((ticket) => (
-          <tr key={ticket.id}>
+          <tr key={ticket.id} 
+          onClick={() =>setSelectedTicket(ticket)}
+          >
           <td>{ticket.id}</td>
           <td>{ticket.title}</td>
           <td>
